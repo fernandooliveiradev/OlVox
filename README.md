@@ -7,19 +7,16 @@ O processamento da transcrição acontece localmente. Não há limite de transcr
 
 ### Linux (incluindo Omarchy)
 
-[Baixe o OlVox para Linux (AppImage)](https://github.com/fernandooliveiradev/OlVox/releases/download/v1.0.0/OlVox-x86_64.AppImage). Este arquivo é para computadores x86-64 e foi testado no Omarchy.
-
-**Antes de abrir pela primeira vez**, permita que o arquivo seja executado. Na pasta Downloads, clique com o botão direito em `OlVox-x86_64.AppImage`, abra **Propriedades** e habilite a opção para executar como programa. Depois abra o arquivo.
-
-Se o duplo clique não abrir no seu gerenciador de arquivos, ou se preferir usar o terminal, rode este comando depois do download:
+Abra o terminal e execute os dois comandos abaixo. O instalador baixa o OlVox, verifica o arquivo e cria um atalho no menu de aplicativos para o usuário atual, sem solicitar senha de administrador:
 
 ```bash
-chmod +x ~/Downloads/OlVox-x86_64.AppImage && ~/Downloads/OlVox-x86_64.AppImage
+curl -fsSLO https://github.com/fernandooliveiradev/OlVox/releases/download/v1.0.0/OlVox-Install.sh
+bash OlVox-Install.sh
 ```
 
-A permissão é necessária porque o arquivo baixado vem sem ela. Ela só precisa ser configurada uma vez para cada arquivo baixado.
+Depois procure **OlVox** no menu. O instalador funciona em Linux x86-64 e foi testado no Omarchy. Se você já baixou o AppImage, pode evitar outro download usando `bash OlVox-Install.sh ~/Downloads/OlVox-x86_64.AppImage`.
 
-Há também um pacote `.deb` na [página de downloads](https://github.com/fernandooliveiradev/OlVox/releases) para Ubuntu e Debian compatíveis, instalável com `sudo apt install ./OlVox-Linux-amd64.deb`.
+O [AppImage avulso](https://github.com/fernandooliveiradev/OlVox/releases/download/v1.0.0/OlVox-x86_64.AppImage) também está disponível para quem prefere uso portátil. No Ubuntu ou Debian, há ainda um `.deb` na [página de downloads](https://github.com/fernandooliveiradev/OlVox/releases).
 
 ### Windows
 
