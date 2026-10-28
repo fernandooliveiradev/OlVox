@@ -1,31 +1,7 @@
-# Contributing to faster-whisper
+# Contribuindo com o OlVox
 
-Contributions are welcome! Here are some pointers to help you install the library for development and validate your changes before submitting a pull request.
+Relatos de problemas e pull requests são bem-vindos. Informe o sistema operacional, os passos para reproduzir o problema e o resultado esperado. Não inclua áudios, transcrições, tokens ou outros dados privados.
 
-## Install the library for development
+Para preparar o ambiente local e executar o aplicativo, siga o [README](README.md). A suíte de API em `tests/test_api.py` exige a amostra `tests/data/jfk.flac` e pode baixar modelos.
 
-We recommend installing the module in editable mode with the `dev` extra requirements:
-
-```bash
-git clone https://github.com/SYSTRAN/faster-whisper.git
-cd faster-whisper/
-pip install -e .[dev]
-```
-
-## Validate the changes before creating a pull request
-
-1. Make sure the existing tests are still passing (and consider adding new tests as well!):
-
-```bash
-pytest tests/
-```
-
-2. Reformat and validate the code with the following tools:
-
-```bash
-black .
-isort .
-flake8 .
-```
-
-These steps are also run automatically in the CI when you open the pull request.
+Para alterações no faster-whisper incluído neste repositório, consulte também a [documentação original](README-faster-whisper.md).

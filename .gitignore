@@ -13,3 +13,31 @@ venv/
 # Ignore IDE, Editor Files
 .idea/
 .vscode/
+
+# Vox app
+.venv/
+data/
+yt_audio.*
+*.mp3
+
+# Builds de desktop
+build/
+dist/
+*.AppImage
+
+# Dados locais e credenciais
+video.txt
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Ferramentas locais do sistema de licenciamento descontinuado
+/license.py
+/tools/make_license.py
+
+# Cópias locais antigas e dados de exemplo
+/index.html
+/test_api.py
+/transcrever.py
