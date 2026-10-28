@@ -3,20 +3,29 @@
 Webapp local de transcrição de vídeos e áudios com [faster-whisper](https://github.com/SYSTRAN/faster-whisper).
 O processamento da transcrição acontece localmente. Não há limite de transcrições nem necessidade de chave. Veja a seção Privacidade para detalhes sobre conexões de rede.
 
-## Download e instalação
+## Baixar e instalar
 
-Os instaladores ficam em [Releases](https://github.com/fernandooliveiradev/OlVox/releases). O Windows usa `OlVox_Setup.exe`; o Linux usa o pacote `.deb` para computadores x86-64 com Debian ou Ubuntu compatível (glibc 2.35 ou posterior).
+### Linux (incluindo Omarchy)
 
-Para Linux x86-64, incluindo Omarchy e outras distribuições baseadas em Arch, baixe `OlVox-x86_64.AppImage`, permita sua execução e abra o arquivo. Pelo terminal:
+[Baixe o OlVox para Linux (AppImage)](https://github.com/fernandooliveiradev/OlVox/releases/download/v1.0.0/OlVox-x86_64.AppImage). Este arquivo é para computadores x86-64 e foi testado no Omarchy.
+
+**Antes de abrir pela primeira vez**, permita que o arquivo seja executado. Na pasta Downloads, clique com o botão direito em `OlVox-x86_64.AppImage`, abra **Propriedades** e habilite a opção para executar como programa. Depois abra o arquivo.
+
+Se preferir usar o terminal, rode este comando depois do download:
 
 ```bash
-chmod +x ~/Downloads/OlVox-x86_64.AppImage
-~/Downloads/OlVox-x86_64.AppImage
+chmod +x ~/Downloads/OlVox-x86_64.AppImage && ~/Downloads/OlVox-x86_64.AppImage
 ```
 
-No Ubuntu ou Debian, instale o pacote baixado com `sudo apt install ./OlVox-Linux-amd64.deb`. No Windows, execute o instalador e siga as instruções. O instalador ainda não possui assinatura digital, por isso o Windows pode apresentar um aviso de aplicativo desconhecido.
+A permissão é necessária porque o arquivo baixado vem sem ela. Ela só precisa ser configurada uma vez para cada arquivo baixado.
 
-O modelo de transcrição é baixado na primeira utilização. A distribuição inclui ferramentas de terceiros, que possuem suas próprias licenças.
+Há também um pacote `.deb` na [página de downloads](https://github.com/fernandooliveiradev/OlVox/releases) para Ubuntu e Debian compatíveis, instalável com `sudo apt install ./OlVox-Linux-amd64.deb`.
+
+### Windows
+
+[Baixe o instalador para Windows](https://github.com/fernandooliveiradev/OlVox/releases/download/v1.0.0/OlVox_Setup.exe) e execute-o. O Windows pode apresentar um aviso de aplicativo desconhecido porque o instalador ainda não possui assinatura digital.
+
+O modelo de transcrição é baixado na primeira utilização. As ferramentas incluídas possuem suas próprias licenças.
 
 ## Rodar
 
