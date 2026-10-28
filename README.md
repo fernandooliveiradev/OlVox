@@ -3,6 +3,14 @@
 Webapp local de transcrição de vídeos e áudios com [faster-whisper](https://github.com/SYSTRAN/faster-whisper).
 O processamento da transcrição acontece localmente. Não há limite de transcrições nem necessidade de chave. Veja a seção Privacidade para detalhes sobre conexões de rede.
 
+## Download e instalação
+
+Os instaladores ficam em [Releases](https://github.com/fernandooliveiradev/OlVox/releases). O Windows usa `OlVox_Setup.exe`; o Linux usa o pacote `.deb` para computadores x86-64 com Debian ou Ubuntu compatível (glibc 2.35 ou posterior).
+
+No Ubuntu ou Debian, instale o pacote baixado com `sudo apt install ./OlVox-Linux-amd64.deb`. No Windows, execute o instalador e siga as instruções. O instalador ainda não possui assinatura digital, por isso o Windows pode apresentar um aviso de aplicativo desconhecido.
+
+O modelo de transcrição é baixado na primeira utilização. A distribuição inclui ferramentas de terceiros, que possuem suas próprias licenças.
+
 ## Rodar
 
 No Linux, com Python 3.10 ou superior, crie um ambiente virtual na pasta do projeto:
