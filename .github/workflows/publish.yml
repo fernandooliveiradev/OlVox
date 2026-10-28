@@ -1,0 +1,64 @@
+name: Publish tested installers
+on:
+  workflow_dispatch:
+    inputs:
+      build_run_id:
+        description: Successful installer build run ID
+        required: true
+        type: string
+      version:
+        description: Release tag
+        required: true
+        type: string
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify successful build
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BUILD_RUN_ID: ${{ inputs.build_run_id }}
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: |
+          [[ "$BUILD_RUN_ID" =~ ^[0-9]+$ ]]
+          [[ "$RELEASE_VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$BUILD_RUN_ID" > run.json
+          test "$(jq -r .status run.json)" = completed
+          test "$(jq -r .conclusion run.json)" = success
+          test "$(jq -r .name run.json)" = 'Build installers'
+          git merge-base --is-ancestor "$(jq -r .head_sha run.json)" "$GITHUB_SHA"
+      - uses: actions/download-artifact@v4
+        with:
+          name: OlVox-Windows
+          path: release
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.build_run_id }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: OlVox-Linux
+          path: release
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.build_run_id }}
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: |
+          cd release
+          sha256sum OlVox_Setup.exe OlVox-Linux-amd64.deb > SHA256SUMS.txt
+          cat > notes.md <<'EOF'
+          Aplicativo de transcrição local, sem limite de uso.
+
+          - **Windows x64:** baixe e execute `OlVox_Setup.exe`. O instalador ainda não tem assinatura digital e pode gerar um aviso do Windows.
+          - **Ubuntu/Debian x86-64:** baixe `OlVox-Linux-amd64.deb` e instale com `sudo apt install ./OlVox-Linux-amd64.deb`. Requer glibc 2.35 ou posterior.
+
+          O modelo de transcrição é baixado na primeira utilização. Ambos os instaladores foram instalados e testados com uma transcrição real em máquinas de CI. `SHA256SUMS.txt` permite conferir a integridade dos arquivos.
+          EOF
+          gh release create "$RELEASE_VERSION" --target "$GITHUB_SHA" --title "OlVox $RELEASE_VERSION" --notes-file notes.md OlVox_Setup.exe OlVox-Linux-amd64.deb SHA256SUMS.txt
