@@ -1,172 +1,67 @@
-name: Build
-
+name: Build installers
 on:
   workflow_dispatch:
-  push:
-    tags:
-      - 'v*'
 
 jobs:
   windows:
-    name: Windows (instalador .exe)
     runs-on: windows-latest
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-
-      - name: Criar ambiente virtual
-        run: python -m venv .venv
-
-      - name: Instalar dependencias
-        run: |
-          .venv\Scripts\python.exe -m pip install --upgrade pip
-          .venv\Scripts\pip.exe install -r requirements-app.txt -r requirements-desktop.txt
-
-      - name: Instalar Inno Setup
-        run: choco install innosetup --no-progress -y
-
-      - name: Build
+      - run: python -m venv .venv
+      - name: Build executable and installer
         shell: cmd
         run: build_windows.bat
-
-      - name: Upload do instalador
+      - name: Install silently
+        shell: pwsh
+        run: |
+          $p = Start-Process -FilePath "$PWD\dist\OlVox_Setup.exe" -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART',"/DIR=$PWD\installed" -Wait -PassThru
+          if ($p.ExitCode -ne 0) { throw "Installer failed: $($p.ExitCode)" }
+          if (!(Test-Path "$PWD\installed\OlVox.exe")) { throw 'Installed executable missing' }
+      - name: Test installed application and transcription
+        run: .venv\Scripts\python.exe scripts/test_packaged.py installed/OlVox.exe tests/data/jfk.flac
+      - name: Upload Windows installer
         uses: actions/upload-artifact@v4
         with:
           name: OlVox-Windows
-          path: |
-            dist/OlVox_Setup.exe
-            dist/OlVox
+          path: dist/OlVox_Setup.exe
+          if-no-files-found: error
+          compression-level: 0
 
   linux:
-    name: Linux (AppImage / pasta)
     runs-on: ubuntu-22.04
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-
-      - name: Dependencias de sistema
+      - run: python -m venv .venv
+      - name: Build executable
+        run: bash build_linux.sh
+      - name: Test application and transcription
+        run: .venv/bin/python scripts/test_packaged.py dist/OlVox/OlVox tests/data/jfk.flac
+      - name: Build Debian package
+        run: |
+          mkdir -p package/DEBIAN package/opt/olvox package/usr/bin package/usr/share/applications package/usr/share/icons/hicolor/256x256/apps
+          cp -a dist/OlVox/. package/opt/olvox/
+          ln -s /opt/olvox/OlVox package/usr/bin/olvox
+          cp assets/vox-256.png package/usr/share/icons/hicolor/256x256/apps/olvox.png
+          printf '[Desktop Entry]\nType=Application\nName=OlVox\nExec=/opt/olvox/OlVox\nIcon=olvox\nCategories=AudioVideo;Audio;\nTerminal=false\n' > package/usr/share/applications/olvox.desktop
+          printf 'Package: olvox\nVersion: 1.0.0\nSection: sound\nPriority: optional\nArchitecture: amd64\nMaintainer: OlVox contributors\nDepends: libc6 (>= 2.35), libgl1, libnss3, libxkbcommon0, libegl1, libdbus-1-3\nDescription: Local audio and video transcription\n' > package/DEBIAN/control
+          dpkg-deb --build --root-owner-group package OlVox-Linux-amd64.deb
+          dpkg-deb --info OlVox-Linux-amd64.deb
+      - name: Test installed Debian package
         run: |
           sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.0-37 libgtk-3-0 libappindicator3-1 fuse
-
-      - name: Criar ambiente virtual
-        run: python -m venv .venv
-
-      - name: Instalar dependencias
-        run: |
-          .venv/bin/pip install --upgrade pip
-          .venv/bin/pip install -r requirements-app.txt -r requirements-desktop.txt
-
-      - name: Build
-        run: bash build_linux.sh
-
-      - name: AppImage (opcional)
-        continue-on-error: true
-        run: |
-          sudo apt-get install -y wget desktop-file-utils
-          wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool.AppImage
-          chmod +x appimagetool.AppImage
-          cat > OlVox.desktop <<'EOF'
-          [Desktop Entry]
-          Type=Application
-          Name=OlVox
-          Exec=OlVox
-          Icon=vox
-          Categories=Utility;
-          EOF
-          touch vox.png
-          mkdir -p OlVox.AppDir
-          cp -r dist/OlVox/* OlVox.AppDir/
-          cp OlVox.desktop OlVox.AppDir/
-          cp vox.png OlVox.AppDir/
-          ./appimagetool.AppImage OlVox.AppDir
-
-      - name: Upload
-        uses: actions/upload-artifact@v4
+          sudo apt-get install -y ./OlVox-Linux-amd64.deb
+          .venv/bin/python scripts/test_packaged.py /opt/olvox/OlVox tests/data/jfk.flac
+      - uses: actions/upload-artifact@v4
         with:
           name: OlVox-Linux
-          path: dist/OlVox
+          path: OlVox-Linux-amd64.deb
           if-no-files-found: error
-
-  release:
-    name: Release (links de download)
-    needs: [windows, linux, smoke-test]
-    if: startsWith(github.ref, 'refs/tags/v')
-    runs-on: ubuntu-22.04
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/download-artifact@v4
-        with:
-          name: OlVox-Windows
-          path: release
-
-      - uses: actions/download-artifact@v4
-        with:
-          name: OlVox-Linux
-          path: release-linux
-
-      - name: Preparar pacotes
-        run: |
-          # o GitHub bloqueia assets com nome "OlVox_Setup.exe" (404) — renomeia
-          cp -f release/OlVox_Setup.exe release/OlVox-Installer.exe
-          rm -f release/OlVox_Setup.exe
-          (cd release && zip -qr OlVox-Windows-portable.zip OlVox || tar -czf OlVox-Windows-portable.tar.gz OlVox)
-          # o upload/download do artifact perde o bit de execucao — restaurar
-          chmod +x release-linux/OlVox release-linux/bin/ffmpeg release-linux/bin/yt-dlp 2>/dev/null || true
-          find release-linux -path "*PySide6/Qt/libexec/*" -type f -exec chmod +x {} \; 2>/dev/null || true
-          rm -f release-linux/_internal/libstdc++.so.6* release-linux/_internal/libfontconfig.so.1* release-linux/_internal/libxkbcommon.so.0* 2>/dev/null || true
-          mkdir -p pack/OlVox
-          cp -a release-linux/. pack/OlVox/
-          tar -czf release/OlVox-Linux.tar.gz -C pack OlVox
-          rm -rf pack
-          ls -lh release
-
-      - name: Publicar release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release create "${GITHUB_REF_NAME}" \
-            --title "OlVox ${GITHUB_REF_NAME}" \
-            --generate-notes \
-            release/OlVox-Installer.exe \
-            release/OlVox-Linux.tar.gz \
-            release/OlVox-Windows-portable.zip
-
-  # Teste automático: sobe o app empacotado e confere a resposta
-  smoke-test:
-    name: Teste de fumaça
-    needs: [windows, linux]
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: OlVox-Linux
-          path: vox
-
-      - name: Verifica se o app empacotado responde
-        run: |
-          BIN=$(find vox -maxdepth 3 -type f -name OlVox | head -1)
-          echo "executavel: $BIN"
-          chmod +x "$BIN"
-          "$BIN" --no-window > vox.log 2>&1 &
-          for i in $(seq 1 40); do
-            URL=$(grep -o 'http://127.0.0.1:[0-9]*' vox.log 2>/dev/null | head -1 || true)
-            [ -n "$URL" ] && break
-            sleep 1
-          done
-          echo "app em $URL"
-          if [ -z "$URL" ]; then
-            echo "---- log do app ----"
-            cat vox.log || true
-          fi
-          curl -fsS --max-time 10 "$URL/health"
-          curl -fsS --max-time 10 "$URL/" | grep -q "Transcrever" && echo "OK: interface carregada"
+          compression-level: 0
