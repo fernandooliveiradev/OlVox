@@ -7,6 +7,13 @@ O processamento da transcrição acontece localmente. Não há limite de transcr
 
 Os instaladores ficam em [Releases](https://github.com/fernandooliveiradev/OlVox/releases). O Windows usa `OlVox_Setup.exe`; o Linux usa o pacote `.deb` para computadores x86-64 com Debian ou Ubuntu compatível (glibc 2.35 ou posterior).
 
+Para Linux x86-64, incluindo Omarchy e outras distribuições baseadas em Arch, baixe `OlVox-x86_64.AppImage`, permita sua execução e abra o arquivo. Pelo terminal:
+
+```bash
+chmod +x ~/Downloads/OlVox-x86_64.AppImage
+~/Downloads/OlVox-x86_64.AppImage
+```
+
 No Ubuntu ou Debian, instale o pacote baixado com `sudo apt install ./OlVox-Linux-amd64.deb`. No Windows, execute o instalador e siga as instruções. O instalador ainda não possui assinatura digital, por isso o Windows pode apresentar um aviso de aplicativo desconhecido.
 
 O modelo de transcrição é baixado na primeira utilização. A distribuição inclui ferramentas de terceiros, que possuem suas próprias licenças.
