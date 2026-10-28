@@ -11,7 +11,7 @@ O processamento da transcrição acontece localmente. Não há limite de transcr
 
 **Antes de abrir pela primeira vez**, permita que o arquivo seja executado. Na pasta Downloads, clique com o botão direito em `OlVox-x86_64.AppImage`, abra **Propriedades** e habilite a opção para executar como programa. Depois abra o arquivo.
 
-Se preferir usar o terminal, rode este comando depois do download:
+Se o duplo clique não abrir no seu gerenciador de arquivos, ou se preferir usar o terminal, rode este comando depois do download:
 
 ```bash
 chmod +x ~/Downloads/OlVox-x86_64.AppImage && ~/Downloads/OlVox-x86_64.AppImage
